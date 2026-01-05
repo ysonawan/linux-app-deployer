@@ -298,3 +298,187 @@ git pull
 uv pip install -r requirements.txt
 sudo systemctl restart mcp-linux-app-deployer.service
 ```
+
+---
+
+## Cursor and Claude Desktop Integration
+
+This section explains how to configure the Linux Deployer MCP Server with Cursor or Claude Desktop to enable local AI assistance with deployment tasks.
+
+### Configuration for Cursor
+
+1. **Open Cursor Settings**:
+   - Open Cursor and go to `Settings` (or `Cursor` > `Settings` on macOS)
+   - Navigate to the `Features` tab and locate the MCP section
+
+2. **Add MCP Server Configuration**:
+   
+   **Without API Key (if authentication is disabled)**:
+   ```json
+   "linux-app-deployer": {
+     "command": "npx",
+     "args": [
+       "mcp-remote",
+       "https://mcp.famvest.online/mcp"
+     ]
+   }
+   ```
+
+   **With API Key (if authentication is enabled)** - **Recommended Method**:
+   ```json
+   "linux-app-deployer": {
+     "command": "npx",
+     "args": [
+       "mcp-remote",
+       "https://mcp.famvest.online/mcp"
+     ],
+     "env": {
+       "MCP_API_KEY": "your-secret-api-key-here"
+     }
+   }
+   ```
+   
+   Replace `your-secret-api-key-here` with your actual API key.
+
+3. **Restart Cursor**:
+   - Close and reopen Cursor to apply the configuration
+   - The MCP server connection will be established automatically
+
+### Configuration for Claude Desktop
+
+1. **Locate Configuration File**:
+   - On macOS, the configuration file is located at:
+     ```
+     ~/Library/Application Support/Claude/claude_desktop_config.json
+     ```
+   - On Windows, the file is typically at:
+     ```
+     %APPDATA%\Claude\claude_desktop_config.json
+     ```
+   - On Linux, the file is typically at:
+     ```
+     ~/.config/Claude/claude_desktop_config.json
+     ```
+
+2. **Edit Configuration File**:
+   - Open the `claude_desktop_config.json` file in your text editor
+   
+   **Without API Key (if authentication is disabled)**:
+   ```json
+   {
+     "mcpServers": {
+       "linux-app-deployer": {
+         "command": "npx",
+         "args": [
+           "mcp-remote",
+           "https://mcp.famvest.online/mcp"
+         ]
+       }
+     }
+   }
+   ```
+
+   **With API Key (if authentication is enabled)** - **Recommended Method**:
+   ```json
+   {
+     "mcpServers": {
+       "linux-app-deployer": {
+         "command": "npx",
+         "args": [
+           "mcp-remote",
+           "https://mcp.famvest.online/mcp"
+         ],
+         "env": {
+           "MCP_API_KEY": "your-secret-api-key-here"
+         }
+       }
+     }
+   }
+   ```
+   
+   Replace `your-secret-api-key-here` with your actual API key.
+
+3. **Restart Claude Desktop**:
+   - Close and reopen Claude Desktop
+   - The MCP server connection will be established automatically
+
+### API Key Setup for Cursor/Claude Desktop
+
+To use the API key with Cursor or Claude Desktop:
+
+1. **Get the API Key**: Contact your system administrator for the secret API key set in the Nginx configuration
+
+2. **Update Your Configuration**: Replace `your-secret-api-key-here` in the config with your actual API key:
+   ```json
+   "env": {
+     "MCP_API_KEY": "your-secret-api-key-here"
+   }
+   ```
+
+3. **Keep it Secure**: 
+   - Store your configuration files with restricted permissions
+   - For Claude Desktop: `chmod 600 ~/Library/Application\ Support/Claude/claude_desktop_config.json`
+   - For Cursor: Ensure your settings file is not world-readable
+   - **DO NOT** commit API keys to version control systems
+   - Consider using a `.env` file approach if your config file is shared
+
+### Using the MCP Server in Cursor/Claude Desktop
+
+Once configured, you can interact with the Linux Deployer MCP Server by:
+- Mentioning deployment tasks in your conversations
+- Asking for help with application deployment workflows
+- Requesting system command execution through the available tools
+- Getting AI-assisted guidance on deployment best practices
+
+The AI assistant will have access to the tools provided by the Linux Deployer MCP Server and can help you automate and manage your Linux application deployments.
+
+### Troubleshooting Connection Issues
+
+If the MCP server connection is not established:
+
+1. **Verify Network Connectivity**:
+   - Ensure your machine can reach `https://mcp.famvest.online`:
+     ```bash
+     curl https://mcp.famvest.online/health
+     ```
+
+2. **Check MCP Server Status**:
+   - On the production server, verify the service is running:
+     ```bash
+     sudo systemctl status mcp-linux-app-deployer.service
+     ```
+
+3. **Review Logs**:
+   - Check Claude Desktop or Cursor logs for connection errors
+   - Review the MCP server logs on the remote machine:
+     ```bash
+     sudo journalctl -u mcp-linux-app-deployer.service -f
+     ```
+
+4. **Verify Configuration Syntax**:
+   - Ensure the JSON configuration is properly formatted
+   - Reload Cursor or Claude Desktop after making changes
+
+5. **API Key Authentication Issues** (if authentication is enabled):
+   - **401 Unauthorized**: The API key is missing or invalid
+     - Verify the `MCP_API_KEY` environment variable is set in your config
+     - Confirm the API key value matches the one configured in Nginx
+     - Test with curl:
+       ```bash
+       curl -H "X-API-Key: your-actual-api-key" https://mcp.famvest.online/mcp
+       ```
+   
+   - **Connection Fails After Configuration Update**: Configuration changes may not take effect immediately
+     - Restart Cursor or Claude Desktop completely (not just close and reopen)
+     - Clear any cached data in the application settings
+     - Verify the JSON configuration syntax is valid
+   
+   - **401 Error in Logs**: The API key doesn't match Nginx configuration
+     - Double-check that the API key in your Cursor/Claude Desktop config matches the one set in `/etc/nginx/sites-available/mcp.famvest.online`
+     - Ensure there are no extra spaces or special characters in the API key
+
+6. **Configuration File Issues**:
+   - Verify the JSON syntax is valid (use a JSON validator if unsure)
+   - Ensure the file has proper permissions: `chmod 600 ~/path/to/config.json`
+   - For Claude Desktop, the exact file path is important—use the full path matching your OS
+

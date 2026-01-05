@@ -5,7 +5,16 @@ server {
     ssl_certificate /etc/letsencrypt/live/mcp.famvest.online/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/mcp.famvest.online/privkey.pem;
 
+    # 🔐 AUTHENTICATION: Define the valid API key
+    # Update this value with your secret API key
+    set $valid_api_key "your-secret-api-key-here";
+
     location /mcp {
+        # 🔐 API Key Authentication Check
+        if ($http_x_api_key != $valid_api_key) {
+            return 401 "Unauthorized: Invalid or missing API key in X-API-Key header";
+        }
+
         proxy_pass http://127.0.0.1:8001/mcp;
         proxy_http_version 1.1;
 
@@ -16,6 +25,9 @@ server {
 
         # 🔴 CRITICAL: forward Accept header for SSE
         proxy_set_header Accept $http_accept;
+
+        # 🔐 AUTHENTICATION: forward X-API-Key header (optional, for logging)
+        proxy_set_header X-API-Key $http_x_api_key;
 
         # REQUIRED FOR SSE
         proxy_buffering off;
