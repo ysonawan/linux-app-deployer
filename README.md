@@ -153,6 +153,18 @@ Follow the interactive prompts to configure automatic renewal and other options.
 
 #### 2.5 Deploy Nginx Configuration
 
+Setup secret key for api authentication
+```bash
+vi /etc/nginx/nginx.conf
+```
+Add the following line within the `http` block to define the API key:
+```
+map $http_x_api_key $mcp_api_key_valid {
+  default 0;
+  "your-secret-api-key-here" 1;
+}
+```
+
 Copy the provided Nginx configuration file:
 ```bash
 cd /etc/nginx/sites-available
@@ -312,28 +324,20 @@ This section explains how to configure the Linux Deployer MCP Server with Cursor
    - Navigate to the `Features` tab and locate the MCP section
 
 2. **Add MCP Server Configuration**:
-   
-   **Without API Key (if authentication is disabled)**:
-   ```json
-   "linux-app-deployer": {
-     "command": "npx",
-     "args": [
-       "mcp-remote",
-       "https://mcp.famvest.online/mcp"
-     ]
-   }
-   ```
 
    **With API Key (if authentication is enabled)** - **Recommended Method**:
    ```json
-   "linux-app-deployer": {
-     "command": "npx",
-     "args": [
-       "mcp-remote",
-       "https://mcp.famvest.online/mcp"
-     ],
-     "env": {
-       "MCP_API_KEY": "your-secret-api-key-here"
+   {
+     "mcpServers": {
+       "linux-app-deployer": {
+         "command": "npx",
+         "args": [
+           "mcp-remote",
+           "https://mcp.famvest.online/mcp",
+           "--header",
+           "X-API-Key: your-secret-api-key-here"
+         ]
+       }
      }
    }
    ```
@@ -362,21 +366,6 @@ This section explains how to configure the Linux Deployer MCP Server with Cursor
 
 2. **Edit Configuration File**:
    - Open the `claude_desktop_config.json` file in your text editor
-   
-   **Without API Key (if authentication is disabled)**:
-   ```json
-   {
-     "mcpServers": {
-       "linux-app-deployer": {
-         "command": "npx",
-         "args": [
-           "mcp-remote",
-           "https://mcp.famvest.online/mcp"
-         ]
-       }
-     }
-   }
-   ```
 
    **With API Key (if authentication is enabled)** - **Recommended Method**:
    ```json
@@ -386,11 +375,10 @@ This section explains how to configure the Linux Deployer MCP Server with Cursor
          "command": "npx",
          "args": [
            "mcp-remote",
-           "https://mcp.famvest.online/mcp"
-         ],
-         "env": {
-           "MCP_API_KEY": "your-secret-api-key-here"
-         }
+           "https://mcp.famvest.online/mcp",
+           "--header",
+           "X-API-Key: your-secret-api-key-here"
+         ]
        }
      }
    }
@@ -410,10 +398,17 @@ To use the API key with Cursor or Claude Desktop:
 
 2. **Update Your Configuration**: Replace `your-secret-api-key-here` in the config with your actual API key:
    ```json
-   "env": {
-     "MCP_API_KEY": "your-secret-api-key-here"
-   }
+    "linux-app-deployer": {
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "https://mcp.famvest.online/mcp",
+        "--header",
+        "X-API-Key: your-secret-api-key-here"
+      ]
+    }
    ```
+   Replace `your-secret-api-key-here` with your actual API key.
 
 3. **Keep it Secure**: 
    - Store your configuration files with restricted permissions
@@ -436,30 +431,24 @@ The AI assistant will have access to the tools provided by the Linux Deployer MC
 
 If the MCP server connection is not established:
 
-1. **Verify Network Connectivity**:
-   - Ensure your machine can reach `https://mcp.famvest.online`:
-     ```bash
-     curl https://mcp.famvest.online/health
-     ```
-
-2. **Check MCP Server Status**:
+1. **Check MCP Server Status**:
    - On the production server, verify the service is running:
      ```bash
      sudo systemctl status mcp-linux-app-deployer.service
      ```
 
-3. **Review Logs**:
+2.**Review Logs**:
    - Check Claude Desktop or Cursor logs for connection errors
    - Review the MCP server logs on the remote machine:
      ```bash
      sudo journalctl -u mcp-linux-app-deployer.service -f
      ```
 
-4. **Verify Configuration Syntax**:
+3.**Verify Configuration Syntax**:
    - Ensure the JSON configuration is properly formatted
    - Reload Cursor or Claude Desktop after making changes
 
-5. **API Key Authentication Issues** (if authentication is enabled):
+4.**API Key Authentication Issues** (if authentication is enabled):
    - **401 Unauthorized**: The API key is missing or invalid
      - Verify the `MCP_API_KEY` environment variable is set in your config
      - Confirm the API key value matches the one configured in Nginx
@@ -477,7 +466,7 @@ If the MCP server connection is not established:
      - Double-check that the API key in your Cursor/Claude Desktop config matches the one set in `/etc/nginx/sites-available/mcp.famvest.online`
      - Ensure there are no extra spaces or special characters in the API key
 
-6. **Configuration File Issues**:
+5. **Configuration File Issues**:
    - Verify the JSON syntax is valid (use a JSON validator if unsure)
    - Ensure the file has proper permissions: `chmod 600 ~/path/to/config.json`
    - For Claude Desktop, the exact file path is important—use the full path matching your OS
