@@ -33,6 +33,24 @@ def require_service(service):
         raise ValueError(f"Service '{service}' not allowed")
     logger.debug(f"Service validation passed: {service}")
 
+def get_artifact_file(application_name):
+    app_cfg = APPLICATIONS[application_name]
+    artifact_pattern = BASE_REPO_DIR / application_name / app_cfg["artifact_path"]
+
+    if '*' in str(artifact_pattern):
+        artifacts = list(artifact_pattern.parent.glob(artifact_pattern.name))
+        if not artifacts:
+            raise ValueError("No artifact found matching pattern")
+        # Sort by modification time descending (newest first)
+        artifacts.sort(key=lambda p: p.stat().st_mtime, reverse=True)
+        artifact = artifacts[0]
+        if len(artifacts) > 1:
+            logger.info(f"Multiple artifacts found, using the newest: {artifact}")
+    else:
+        artifact = artifact_pattern
+
+    return artifact
+
 # -------------------------
 # MCP TOOLS
 # -------------------------
@@ -97,11 +115,10 @@ def setup_tools(mcp):
 
         require_application(application_name)
 
-        app_cfg = APPLICATIONS[application_name]
-        artifact = BASE_REPO_DIR / application_name / app_cfg["artifact_path"]
-
-        if not artifact.exists():
-            return {"success": False, "error": "Artifact not found"}
+        try:
+            artifact = get_artifact_file(application_name)
+        except ValueError as e:
+            return {"success": False, "error": str(e)}
 
         if artifact.stat().st_size == 0:
             return {"success": False, "error": "Artifact size is zero"}
@@ -118,10 +135,10 @@ def setup_tools(mcp):
             require_application(application_name)
 
             app_cfg = APPLICATIONS[application_name]
-            artifact = BASE_REPO_DIR / application_name / app_cfg["artifact_path"]
-
-            if not artifact.exists():
-                logger.error("Artifact not found for deployment", extra={"extra_fields": {"application_name": application_name, "artifact": str(artifact)}})
+            try:
+                artifact = get_artifact_file(application_name)
+            except ValueError as e:
+                logger.error("Artifact not found for deployment", extra={"extra_fields": {"application_name": application_name, "error": str(e)}})
                 raise ValueError("Artifact not found, build first")
 
             deploy_dir = app_cfg['deploy_path']
