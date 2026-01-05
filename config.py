@@ -8,29 +8,29 @@ APPLICATIONS = {
         "git_url": "https://github.com/ysonawan/famvest.git",
         "branch": "main",
         "build_type": "maven",
-        "artifact_path": "target/famvest-app-*.jar",
-        "service_name": "famvest-app",
-        "deploy_path": BASE_DEPLOY_DIR / "famvest-app"
+        "artifact_path": "target/famvest-*.jar",
+        "service_name": "famvest",
+        "deploy_path": BASE_DEPLOY_DIR / "famvest"
     },
     "netly": {
         "git_url": "https://github.com/ysonawan/netly.git",
         "branch": "main",
         "build_type": "maven",
-        "artifact_path": "target/netly-app-*.jar",
-        "service_name": "netly-app",
-        "deploy_path": BASE_DEPLOY_DIR / "netly-app"
+        "artifact_path": "target/netly-*.jar",
+        "service_name": "netly",
+        "deploy_path": BASE_DEPLOY_DIR / "netly"
     },
     "duebook": {
         "git_url": "https://github.com/ysonawan/duebook.git",
         "branch": "main",
         "build_type": "maven",
-        "artifact_path": "target/duebook-app-*.jar",
-        "service_name": "duebook-app",
-        "deploy_path": BASE_DEPLOY_DIR / "duebook-app"
+        "artifact_path": "target/duebook-*.jar",
+        "service_name": "duebook",
+        "deploy_path": BASE_DEPLOY_DIR / "duebook"
     }
 }
 
-ALLOWED_SERVICES = {"famvest-app", "netly-app", "duebook-app"}
+ALLOWED_SERVICES = {"famvest", "netly", "duebook"}
 
 BUILD_COMMANDS = {
     "maven": ["mvn", "clean", "package", "-DskipTests"]
