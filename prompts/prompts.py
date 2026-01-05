@@ -14,7 +14,7 @@ def setup_prompts(mcp):
         RULES (NON-NEGOTIABLE):
         1. Read the "deployment-config" mcp resource
         2. Never execute deployments unless explicitly requested by the user.
-        3. Always follow this order:
+        3. List out this plan to user and always follow this order:
            - checkout_repository
            - build_application
            - verify_artifact
