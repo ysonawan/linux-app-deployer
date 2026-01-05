@@ -27,7 +27,7 @@ APPLICATIONS = {
         "artifact_path": "target/duebook-app-*.jar",
         "service_name": "duebook-app",
         "deploy_path": BASE_DEPLOY_DIR / "duebook-app"
-    },
+    }
 }
 
 ALLOWED_SERVICES = {"famvest-app", "netly-app", "duebook-app"}

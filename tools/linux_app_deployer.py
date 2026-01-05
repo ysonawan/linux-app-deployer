@@ -20,7 +20,7 @@ def _run(cmd, cwd=None):
 def require_repo(application_name):
     if application_name not in APPLICATIONS:
         logger.warning(f"Attempted access to unauthorized repository: {application_name}")
-        raise ValueError(f"Repository '{application_name}' not allowed")
+        raise ValueError(f"Application '{application_name}' not allowed")
     logger.debug(f"Repository validation passed: {application_name}")
 
 def require_service(service):
@@ -38,6 +38,8 @@ def setup_tools(mcp):
         """
           Clone or update repository safely.
         """
+        logger.info("Checking out application source code", extra={"extra_fields": {"application_name": application_name}})
+
         require_repo(application_name)
 
         app_cfg = APPLICATIONS[application_name]
@@ -58,6 +60,8 @@ def setup_tools(mcp):
         """
             Build application using predefined build system.
         """
+        logger.info("Building application", extra={"extra_fields": {"application_name": application_name}})
+
         require_repo(application_name)
         if application_name not in APPLICATIONS:
             raise ValueError("Repository not allowed")
@@ -77,6 +81,8 @@ def setup_tools(mcp):
         """
             Verify build artifact exists and is non-empty.
         """
+        logger.info("Verifying artifact", extra={"extra_fields": {"application_name": application_name}})
+
         require_repo(application_name)
 
         app_cfg = APPLICATIONS[application_name]
@@ -95,7 +101,7 @@ def setup_tools(mcp):
         """
         Copy artifact to deployment directory with backup.
         """
-        logger.info("Deploying artifact", extra={"extra_fields": {"repo_name": application_name}})
+        logger.info("Deploying artifact", extra={"extra_fields": {"application_name": application_name}})
         try:
             require_repo(application_name)
 
@@ -103,7 +109,7 @@ def setup_tools(mcp):
             artifact = BASE_REPO_DIR / application_name / app_cfg["artifact_path"]
 
             if not artifact.exists():
-                logger.error("Artifact not found for deployment", extra={"extra_fields": {"repo": application_name, "artifact": str(artifact)}})
+                logger.error("Artifact not found for deployment", extra={"extra_fields": {"application_name": application_name, "artifact": str(artifact)}})
                 raise ValueError("Artifact not found, build first")
 
             deploy_dir = app_cfg['deploy_path']
@@ -113,13 +119,13 @@ def setup_tools(mcp):
             backup = deploy_dir / f"{artifact.name}.bak"
 
             if target.exists():
-                logger.info("Creating backup of existing deployment", extra={"extra_fields": {"repo": application_name, "backup": str(backup)}})
+                logger.info("Creating backup of existing deployment", extra={"extra_fields": {"application_name": application_name, "backup": str(backup)}})
                 shutil.move(target, backup)
 
-            logger.info("Copying artifact to deployment directory", extra={"extra_fields": {"repo": application_name, "source": str(artifact), "target": str(target)}})
+            logger.info("Copying artifact to deployment directory", extra={"extra_fields": {"application_name": application_name, "source": str(artifact), "target": str(target)}})
             shutil.copy2(artifact, target)
 
-            logger.info("Artifact deployed successfully", extra={"extra_fields": {"repo": application_name, "deployed_to": str(target)}})
+            logger.info("Artifact deployed successfully", extra={"extra_fields": {"application_name": application_name, "deployed_to": str(target)}})
             return {"success": True, "deployed_to": str(target), "backup": str(backup) if backup.exists() else None}
         except Exception:
             logger.error("Error during artifact deployment", exc_info=True)
@@ -130,7 +136,8 @@ def setup_tools(mcp):
         """
         Restart systemd service.
         """
-        logger.info("Restarting application service", extra={"extra_fields": {"service_name": service_name}})
+        logger.info("Restarting application service", extra={"extra_fields": {"application_name": application_name}})
+
         try:
             app_cfg = APPLICATIONS[application_name]
             service_name = app_cfg["service_name"]
@@ -152,11 +159,13 @@ def setup_tools(mcp):
         """
         Get systemd service status.
         """
-        logger.debug("Fetching application status", extra={"extra_fields": {"service_name": service_name}})
+        logger.info("Getting application status", extra={"extra_fields": {"application_name": application_name}})
+
         try:
             app_cfg = APPLICATIONS[application_name]
             service_name = app_cfg["service_name"]
             require_service(service_name)
+            logger.debug("Fetching application status", extra={"extra_fields": {"service_name": service_name}})
             result = _run(["systemctl", "status", service_name, "--no-pager"])
             logger.debug("Application status fetched", extra={"extra_fields": {"service": service_name}})
             return {"service": service_name, "status": result}
@@ -169,11 +178,13 @@ def setup_tools(mcp):
         """
         Fetch recent logs safely.
         """
-        logger.debug("Fetching recent logs", extra={"extra_fields": {"service_name": service_name, "lines": lines}})
+        logger.info("Getting recent logs", extra={"extra_fields": {"application_name": application_name}})
+
         try:
             app_cfg = APPLICATIONS[application_name]
             service_name = app_cfg["service_name"]
             require_service(service_name)
+            logger.debug("Fetching recent logs", extra={"extra_fields": {"service_name": service_name, "lines": lines}})
             result = _run(["journalctl", "-u", service_name, "-n", str(lines), "--no-pager"])
             logger.debug("Recent logs fetched", extra={"extra_fields": {"service": service_name}})
             return {"service": service_name, "logs": result}
