@@ -9,7 +9,7 @@ APPLICATIONS = {
         "branch": "main",
         "build_type": "maven",
         "artifact_path": "target/famvest-*.jar",
-        "service_name": "famvest",
+        "service_name": "famvest-app",
         "deploy_path": BASE_DEPLOY_DIR / "famvest"
     },
     "netly": {
@@ -17,7 +17,7 @@ APPLICATIONS = {
         "branch": "main",
         "build_type": "maven",
         "artifact_path": "target/netly-*.jar",
-        "service_name": "netly",
+        "service_name": "netly-app",
         "deploy_path": BASE_DEPLOY_DIR / "netly"
     },
     "duebook": {
@@ -25,12 +25,12 @@ APPLICATIONS = {
         "branch": "main",
         "build_type": "maven",
         "artifact_path": "target/duebook-*.jar",
-        "service_name": "duebook",
+        "service_name": "duebook-app",
         "deploy_path": BASE_DEPLOY_DIR / "duebook"
     }
 }
 
-ALLOWED_SERVICES = {"famvest", "netly", "duebook"}
+ALLOWED_SERVICES = {"famvest-app", "netly-app", "duebook-app"}
 
 BUILD_COMMANDS = {
     "maven": ["mvn", "clean", "package", "-DskipTests"]
