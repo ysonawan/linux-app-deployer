@@ -1,21 +1,17 @@
-server {
-    listen 443 ssl;
-    server_name mcp.famvest.online;
+location /mcp {
+    proxy_pass http://127.0.0.1:8001/mcp;
+    proxy_http_version 1.1;
 
-    ssl_certificate /etc/letsencrypt/live/mcp.famvest.online/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/mcp.famvest.online/privkey.pem;
+    # REQUIRED HEADERS
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 
-    location /mcp {
-        proxy_pass http://127.0.0.1:8001/mcp;
-        proxy_http_version 1.1;
+    # 🔴 CRITICAL: forward Accept header for SSE
+    proxy_set_header Accept $http_accept;
 
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-
-        # REQUIRED for MCP (SSE + streaming)
-        proxy_buffering off;
-        proxy_cache off;
-        chunked_transfer_encoding off;
-    }
+    # REQUIRED FOR SSE
+    proxy_buffering off;
+    proxy_cache off;
+    chunked_transfer_encoding off;
 }
