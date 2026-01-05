@@ -1,27 +1,17 @@
 [Unit]
 Description=Linux Application Deployer MCP Server
-After=network.target
-Wants=network-online.target
+
+After=network.target nginx.service
+Requires=nginx.service
 
 [Service]
-Type=simple
+Restart=always
+RestartSec=5
 User=root
 WorkingDirectory=/opt/mcp/linux-app-deployer
+Environment=UV_CACHE_DIR=/opt/mcp/.uv-cache
 ExecStart=uv run python /opt/mcp/linux-app-deployer/server.py
-Restart=on-failure
-RestartSec=5s
-
-# Security settings
-NoNewPrivileges=true
-PrivateTmp=true
-ProtectSystem=strict
-ProtectHome=yes
-ReadWritePaths=/opt/mcp /var/log/mcp-linux-deployer
-
-# Resource limits
-LimitNOFILE=65536
-LimitNPROC=512
+SuccessExitStatus=143
 
 [Install]
 WantedBy=multi-user.target
-
