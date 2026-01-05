@@ -21,7 +21,7 @@ def setup_prompts(mcp):
            - deploy_artifact
            - restart_application
            - get_application_status
-        4. If any step fails, STOP and report the error.
+        4. Update status of each step to user. If any step fails, STOP and report the error.
         5. Never assume success.
         6. Never suggest commands outside available MCP tools.
         7. Never fabricate command output.
