@@ -1,17 +1,20 @@
 [Unit]
 Description=Linux Application Deployer MCP Server
-
 After=network.target nginx.service
 Requires=nginx.service
 
 [Service]
-Restart=always
-RestartSec=5
+Type=simple
 User=root
 WorkingDirectory=/opt/mcp/linux-app-deployer
-Environment=UV_CACHE_DIR=/opt/mcp/.uv-cache
-ExecStart=uv run python /opt/mcp/linux-app-deployer/server.py
-SuccessExitStatus=143
+
+Environment=PYTHONUNBUFFERED=1
+Environment=UV_CACHE_DIR=/opt/mcp/linux-app-deployer/.uv-cache
+
+ExecStart=/opt/mcp/linux-app-deployer/.venv/bin/python server.py
+
+Restart=always
+RestartSec=5
 
 [Install]
 WantedBy=multi-user.target
