@@ -21,11 +21,11 @@ def _run(cmd, cwd=None, timeout=600):
         logger.warning(f"Command timed out after {timeout} seconds: {' '.join(cmd)}")
         return {"code": -1, "stdout": "", "stderr": f"Command timed out after {timeout} seconds"}
 
-def require_repo(application_name):
+def require_application(application_name):
     if application_name not in APPLICATIONS:
-        logger.warning(f"Attempted access to unauthorized repository: {application_name}")
+        logger.warning(f"Attempted access to unauthorized application: {application_name}")
         raise ValueError(f"Application '{application_name}' not allowed")
-    logger.debug(f"Repository validation passed: {application_name}")
+    logger.debug(f"Application validation passed: {application_name}")
 
 def require_service(service):
     if service not in ALLOWED_SERVICES:
@@ -52,7 +52,7 @@ def setup_tools(mcp):
         """
         logger.info("Checking out application source code", extra={"extra_fields": {"application_name": application_name}})
 
-        require_repo(application_name)
+        require_application(application_name)
 
         app_cfg = APPLICATIONS[application_name]
         repo_path = BASE_REPO_DIR / application_name
@@ -74,7 +74,7 @@ def setup_tools(mcp):
         """
         logger.info("Building application", extra={"extra_fields": {"application_name": application_name}})
 
-        require_repo(application_name)
+        require_application(application_name)
         if application_name not in APPLICATIONS:
             raise ValueError("Repository not allowed")
 
@@ -95,7 +95,7 @@ def setup_tools(mcp):
         """
         logger.info("Verifying artifact", extra={"extra_fields": {"application_name": application_name}})
 
-        require_repo(application_name)
+        require_application(application_name)
 
         app_cfg = APPLICATIONS[application_name]
         artifact = BASE_REPO_DIR / application_name / app_cfg["artifact_path"]
@@ -115,7 +115,7 @@ def setup_tools(mcp):
         """
         logger.info("Deploying artifact", extra={"extra_fields": {"application_name": application_name}})
         try:
-            require_repo(application_name)
+            require_application(application_name)
 
             app_cfg = APPLICATIONS[application_name]
             artifact = BASE_REPO_DIR / application_name / app_cfg["artifact_path"]
@@ -151,6 +151,7 @@ def setup_tools(mcp):
         logger.info("Restarting application service", extra={"extra_fields": {"application_name": application_name}})
 
         try:
+            require_application(application_name)
             app_cfg = APPLICATIONS[application_name]
             service_name = app_cfg["service_name"]
             require_service(service_name)
@@ -174,6 +175,7 @@ def setup_tools(mcp):
         logger.info("Getting application status", extra={"extra_fields": {"application_name": application_name}})
 
         try:
+            require_application(application_name)
             app_cfg = APPLICATIONS[application_name]
             service_name = app_cfg["service_name"]
             require_service(service_name)
@@ -193,6 +195,7 @@ def setup_tools(mcp):
         logger.info("Getting recent logs", extra={"extra_fields": {"application_name": application_name}})
 
         try:
+            require_application(application_name)
             app_cfg = APPLICATIONS[application_name]
             service_name = app_cfg["service_name"]
             require_service(service_name)
