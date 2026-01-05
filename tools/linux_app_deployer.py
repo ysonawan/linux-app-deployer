@@ -34,6 +34,14 @@ def require_service(service):
 # -------------------------
 def setup_tools(mcp):
     @mcp.tool()
+    def get_app_deployment_configuration() -> dict:
+        """
+          get application deployment configuration.
+        """
+        logger.debug("Retrieving deployment configuration")
+        return {"applications": APPLICATIONS}
+
+    @mcp.tool()
     def checkout_repository(application_name: str) -> dict:
         """
           Clone or update repository safely.
