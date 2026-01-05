@@ -1,6 +1,6 @@
 from pathlib import Path
 
-BASE_REPO_DIR = Path("/opt/mcp/repos")
+BASE_REPO_DIR = Path("/opt/repos")
 BASE_DEPLOY_DIR = Path("/opt/app")
 
 APPLICATIONS = {

@@ -13,9 +13,13 @@ logger = get_logger(__name__)
 # -------------------------
 # Utility helpers
 # -------------------------
-def _run(cmd, cwd=None):
-    p = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True)
-    return {"code": p.returncode, "stdout": p.stdout[-4000:], "stderr": p.stderr[-4000:]}
+def _run(cmd, cwd=None, timeout=600):
+    try:
+        p = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, timeout=timeout)
+        return {"code": p.returncode, "stdout": p.stdout[-4000:], "stderr": p.stderr[-4000:]}
+    except subprocess.TimeoutExpired:
+        logger.warning(f"Command timed out after {timeout} seconds: {' '.join(cmd)}")
+        return {"code": -1, "stdout": "", "stderr": f"Command timed out after {timeout} seconds"}
 
 def require_repo(application_name):
     if application_name not in APPLICATIONS:
