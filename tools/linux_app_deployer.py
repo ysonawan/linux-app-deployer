@@ -154,6 +154,15 @@ def setup_tools(mcp):
             logger.info("Copying artifact to deployment directory", extra={"extra_fields": {"application_name": application_name, "source": str(artifact), "target": str(target)}})
             shutil.copy2(artifact, target)
 
+            # Manage symlink if configured
+            if "symlink" in app_cfg:
+                symlink_path = deploy_dir / app_cfg["symlink"]
+                if symlink_path.exists() or symlink_path.is_symlink():
+                    symlink_path.unlink()
+                    logger.info("Removed old symlink", extra={"extra_fields": {"application_name": application_name, "symlink": str(symlink_path)}})
+                symlink_path.symlink_to(target)
+                logger.info("Created symlink", extra={"extra_fields": {"application_name": application_name, "symlink": str(symlink_path), "points_to": str(target)}})
+
             logger.info("Artifact deployed successfully", extra={"extra_fields": {"application_name": application_name, "deployed_to": str(target)}})
             return {"success": True, "deployed_to": str(target), "backup": str(backup) if backup.exists() else None}
         except Exception:
