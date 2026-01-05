@@ -44,3 +44,5 @@ venv.bak/
 .env
 .env.local
 *.log
+
+.github
