@@ -23,7 +23,7 @@ DEFAULT_LINES = int(os.getenv("DEFAULT_LINES", 100))
 
 # Logging Settings
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
-LOG_FILE = Path(os.getenv("LOG_FILE", "./logs/api.log"))
+LOG_FILE = Path(os.getenv("LOG_FILE", "var/log/mcp-linux-deployer/linux-deployer-api.log"))
 
 # API Settings
 API_TITLE = "Linux App Deployer API"
