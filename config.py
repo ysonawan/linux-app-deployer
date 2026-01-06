@@ -5,7 +5,7 @@ BASE_DEPLOY_DIR = Path("/opt/app")
 
 APPLICATIONS = {
     "famvest": {
-        "git_url": "https://github.com/ysonawan/famvest.git",
+        "git_url": "git@github.com/ysonawan/famvest.git",
         "branch": "main",
         "build_type": "maven",
         "artifact_path": "target/famvest-*.jar",
@@ -14,7 +14,7 @@ APPLICATIONS = {
         "symlink": "famvest.jar"
     },
     "netly": {
-        "git_url": "https://github.com/ysonawan/netly.git",
+        "git_url": "git@github.com/ysonawan/netly.git",
         "branch": "main",
         "build_type": "maven",
         "artifact_path": "target/netly-*.jar",
@@ -23,7 +23,7 @@ APPLICATIONS = {
         "symlink": "netly.jar"
     },
     "duebook": {
-        "git_url": "https://github.com/ysonawan/duebook.git",
+        "git_url": "git@github.com/ysonawan/duebook.git",
         "branch": "main",
         "build_type": "maven",
         "artifact_path": "target/duebook-*.jar",

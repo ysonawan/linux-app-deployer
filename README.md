@@ -89,7 +89,62 @@ The production deployment architecture consists of:
 
 ---
 
-### Step 1: Repository Setup
+### Step 1: GitHub SSH Key Setup
+
+**Important**: Before cloning the repository, ensure the remote server can authenticate with GitHub using SSH keys.
+
+#### 1.1 Generate SSH Key Pair (if not already present)
+
+On the remote server, generate a new SSH key pair:
+```bash
+ssh-keygen -t ed25519 -C "mcp@famvest.online" -f ~/.ssh/id_ed25519 -N ""
+```
+
+Or if you prefer RSA:
+```bash
+ssh-keygen -t rsa -b 4096 -C "mcp@famvest.online" -f ~/.ssh/id_rsa -N ""
+```
+
+#### 1.2 Get Your Public Key
+
+Display the public key:
+```bash
+cat ~/.ssh/id_ed25519.pub
+# or for RSA:
+# cat ~/.ssh/id_rsa.pub
+```
+
+Copy the entire output (starts with `ssh-ed25519` or `ssh-rsa`).
+
+#### 1.3 Add Public Key to GitHub
+
+1. Go to GitHub Settings: https://github.com/settings/keys
+2. Click **"New SSH key"**
+3. Add a title (e.g., "MCP Server - famvest.online")
+4. Paste the public key in the **Key** field
+5. Set **Key type** to "Authentication Key"
+6. Click **"Add SSH key"**
+
+#### 1.4 Test SSH Connection
+
+Verify the SSH connection works:
+```bash
+ssh -T git@github.com
+```
+
+You should see: `Hi <your-username>! You've successfully authenticated, but GitHub does not provide shell access.`
+
+#### 1.5 Configure Git (Optional but Recommended)
+
+Set your Git identity on the server:
+```bash
+git config --global user.name "MCP Server"
+git config --global user.email "mcp@famvest.online"
+```
+
+---
+
+### Step 2: Repository Setup
 
 Clone the application repository to the designated production directory.
 
@@ -111,18 +166,18 @@ The application code is now located at `/opt/mcp/linux-app-deployer`.
 
 ---
 
-### Step 2: Web Server and SSL Configuration
+### Step 3: Web Server and SSL Configuration
 
 Configure Nginx as a reverse proxy with SSL/TLS encryption to securely expose the MCP server.
 
-#### 2.1 Verify DNS Resolution
+#### 3.1 Verify DNS Resolution
 
 Before setting up SSL, ensure your domain resolves correctly:
 ```bash
 dig mcp.famvest.online +short
 ```
 
-#### 2.2 Install and Configure Certbot
+#### 3.2 Install and Configure Certbot
 
 Install Certbot for automated SSL certificate management:
 ```bash
@@ -130,7 +185,7 @@ sudo apt install -y certbot python3-certbot-nginx
 certbot --version
 ```
 
-#### 2.3 Validate Nginx Configuration
+#### 3.3 Validate Nginx Configuration
 
 Test the current Nginx setup:
 ```bash
@@ -142,7 +197,7 @@ Reload Nginx to apply any pending changes:
 sudo systemctl reload nginx
 ```
 
-#### 2.4 Obtain SSL Certificate
+#### 3.4 Obtain SSL Certificate
 
 Obtain an SSL certificate for your domain using Certbot:
 ```bash
@@ -151,7 +206,7 @@ sudo certbot --nginx -d mcp.famvest.online
 
 Follow the interactive prompts to configure automatic renewal and other options.
 
-#### 2.5 Deploy Nginx Configuration
+#### 3.5 Deploy Nginx Configuration
 
 Setup secret key for api authentication
 ```bash
@@ -178,7 +233,7 @@ sudo rm -f default
 sudo ln -sf /etc/nginx/sites-available/mcp.famvest.online mcp.famvest.online
 ```
 
-#### 2.6 Final Nginx Validation
+#### 3.6 Final Nginx Validation
 
 Verify the updated configuration and reload:
 ```bash
@@ -188,11 +243,11 @@ sudo systemctl reload nginx
 
 ---
 
-### Step 3: Application Server Setup
+### Step 4: Application Server Setup
 
 Configure the MCP server application with environment variables and dependencies.
 
-#### 3.1 Environment Configuration
+#### 4.1 Environment Configuration
 
 Create a `.env` file from the example template (if available):
 ```bash
@@ -210,7 +265,7 @@ Common configuration parameters:
 - `SERVER_PORT`: Port for the internal server
 - `API_KEY`: Secure API key for authentication
 
-#### 3.2 Install the `uv` Package Manager
+#### 4.2 Install the `uv` Package Manager
 
 Install the high-performance `uv` package manager:
 ```bash
@@ -225,7 +280,7 @@ which uv
 # Expected output: /root/.local/bin/uv
 ```
 
-#### 3.3 Install Project Dependencies
+#### 4.3 Install Project Dependencies
 
 Install all Python dependencies using `uv`:
 ```bash
@@ -242,18 +297,18 @@ pip install -r requirements.txt
 
 ---
 
-### Step 4: Systemd Service Configuration
+### Step 5: Systemd Service Configuration
 
 Set up the MCP server as a systemd service for automatic startup and monitoring.
 
-#### 4.1 Install Service File
+#### 5.1 Install Service File
 
 Copy the systemd service configuration:
 ```bash
 sudo cp /opt/mcp/linux-app-deployer/prod-deployment-scripts/mcp-linux-app-deployer.service /etc/systemd/system/
 ```
 
-#### 4.2 Enable and Start the Service
+#### 5.2 Enable and Start the Service
 
 Reload the systemd daemon to recognize the new service:
 ```bash
@@ -270,7 +325,7 @@ Start the service:
 sudo systemctl restart mcp-linux-app-deployer.service
 ```
 
-#### 4.3 Verify Service Status
+#### 5.3 Verify Service Status
 
 Check the current status of the service:
 ```bash
