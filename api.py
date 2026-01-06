@@ -51,14 +51,6 @@ if ENABLE_CORS:
 
 
 # ========================
-# Request/Response Models
-# ========================
-class DeploymentRequest(BaseModel):
-    """Request model for deployment operations"""
-    application_name: str
-
-
-# ========================
 # Health & Info Endpoints
 # ========================
 @app.get("/health")
@@ -88,8 +80,8 @@ async def get_deployment_configuration() -> Dict[str, Any]:
 # ========================
 # Repository Operations
 # ========================
-@app.post("/api/v1/repository/checkout")
-async def checkout_repo(request: DeploymentRequest) -> Dict[str, Any]:
+@app.post("/api/v1/repository/checkout/{application_name}")
+async def checkout_repo(application_name: str) -> Dict[str, Any]:
     """
     Clone or update repository for the specified application.
 
@@ -97,11 +89,11 @@ async def checkout_repo(request: DeploymentRequest) -> Dict[str, Any]:
         application_name: Name of the application
     """
     try:
-        logger.info(f"Repository checkout requested for {request.application_name}")
-        result = checkout_repository(request.application_name)
+        logger.info(f"Repository checkout requested for {application_name}")
+        result = checkout_repository(application_name)
         return {"success": result.get("success"), "data": result}
     except ValueError as e:
-        logger.warning(f"Invalid application: {request.application_name}")
+        logger.warning(f"Invalid application: {application_name}")
         raise HTTPException(status_code=400, detail=str(e))
     except Exception:
         logger.error("Error checking out repository", exc_info=True)
@@ -111,8 +103,8 @@ async def checkout_repo(request: DeploymentRequest) -> Dict[str, Any]:
 # ========================
 # Build Operations
 # ========================
-@app.post("/api/v1/build/application")
-async def build_app(request: DeploymentRequest) -> Dict[str, Any]:
+@app.post("/api/v1/build/application/{application_name}")
+async def build_app(application_name: str) -> Dict[str, Any]:
     """
     Build application using predefined build system.
 
@@ -120,19 +112,19 @@ async def build_app(request: DeploymentRequest) -> Dict[str, Any]:
         application_name: Name of the application to build
     """
     try:
-        logger.info(f"Application build requested for {request.application_name}")
-        result = build_application(request.application_name)
+        logger.info(f"Application build requested for {application_name}")
+        result = build_application(application_name)
         return {"success": result.get("success"), "data": result}
     except ValueError as e:
-        logger.warning(f"Invalid application: {request.application_name}")
+        logger.warning(f"Invalid application: {application_name}")
         raise HTTPException(status_code=400, detail=str(e))
     except Exception:
         logger.error("Error building application", exc_info=True)
         raise HTTPException(status_code=500, detail="Error building application")
 
 
-@app.post("/api/v1/artifact/verify")
-async def verify_app_artifact(request: DeploymentRequest) -> Dict[str, Any]:
+@app.post("/api/v1/artifact/verify/{application_name}")
+async def verify_app_artifact(application_name: str) -> Dict[str, Any]:
     """
     Verify build artifact exists and is non-empty.
 
@@ -140,11 +132,11 @@ async def verify_app_artifact(request: DeploymentRequest) -> Dict[str, Any]:
         application_name: Name of the application
     """
     try:
-        logger.info(f"Artifact verification requested for {request.application_name}")
-        result = verify_artifact(request.application_name)
+        logger.info(f"Artifact verification requested for {application_name}")
+        result = verify_artifact(application_name)
         return {"success": result.get("success"), "data": result}
     except ValueError as e:
-        logger.warning(f"Invalid application: {request.application_name}")
+        logger.warning(f"Invalid application: {application_name}")
         raise HTTPException(status_code=400, detail=str(e))
     except Exception:
         logger.error("Error verifying artifact", exc_info=True)
@@ -154,8 +146,8 @@ async def verify_app_artifact(request: DeploymentRequest) -> Dict[str, Any]:
 # ========================
 # Deployment Operations
 # ========================
-@app.post("/api/v1/deployment/deploy")
-async def deploy_app(request: DeploymentRequest) -> Dict[str, Any]:
+@app.post("/api/v1/deployment/deploy/{application_name}")
+async def deploy_app(application_name: str) -> Dict[str, Any]:
     """
     Deploy artifact to deployment directory with backup.
 
@@ -163,19 +155,19 @@ async def deploy_app(request: DeploymentRequest) -> Dict[str, Any]:
         application_name: Name of the application to deploy
     """
     try:
-        logger.info(f"Deployment requested for {request.application_name}")
-        result = deploy_artifact(request.application_name)
+        logger.info(f"Deployment requested for {application_name}")
+        result = deploy_artifact(application_name)
         return {"success": result.get("success"), "data": result}
     except ValueError as e:
-        logger.warning(f"Invalid application or artifact: {request.application_name}")
+        logger.warning(f"Invalid application or artifact: {application_name}")
         raise HTTPException(status_code=400, detail=str(e))
     except Exception:
         logger.error("Error deploying artifact", exc_info=True)
         raise HTTPException(status_code=500, detail="Error deploying artifact")
 
 
-@app.post("/api/v1/application/restart")
-async def restart_app(request: DeploymentRequest) -> Dict[str, Any]:
+@app.post("/api/v1/application/restart/{application_name}")
+async def restart_app(application_name: str) -> Dict[str, Any]:
     """
     Restart systemd service for the application.
 
@@ -183,11 +175,11 @@ async def restart_app(request: DeploymentRequest) -> Dict[str, Any]:
         application_name: Name of the application to restart
     """
     try:
-        logger.info(f"Application restart requested for {request.application_name}")
-        result = restart_application(request.application_name)
+        logger.info(f"Application restart requested for {application_name}")
+        result = restart_application(application_name)
         return {"success": result.get("success"), "data": result}
     except ValueError as e:
-        logger.warning(f"Invalid application or service: {request.application_name}")
+        logger.warning(f"Invalid application or service: {application_name}")
         raise HTTPException(status_code=400, detail=str(e))
     except Exception:
         logger.error("Error restarting application", exc_info=True)
@@ -244,8 +236,8 @@ async def get_app_logs(
 # ========================
 # Workflow Endpoints
 # ========================
-@app.post("/api/v1/deployment/workflow/full-deploy")
-async def full_deployment_workflow(request: DeploymentRequest) -> Dict[str, Any]:
+@app.post("/api/v1/deployment/workflow/full-deploy/{application_name}")
+async def full_deployment_workflow(application_name: str) -> Dict[str, Any]:
     """
     Execute full deployment workflow for an application.
     Steps: checkout → build → verify → deploy → restart → status
@@ -254,8 +246,8 @@ async def full_deployment_workflow(request: DeploymentRequest) -> Dict[str, Any]
         application_name: Name of the application to deploy
     """
     try:
-        logger.info(f"Full deployment workflow started for {request.application_name}")
-        application_name = request.application_name
+        logger.info(f"Full deployment workflow started for {application_name}")
+        application_name = application_name
 
         workflow_results = {
             "application": application_name,

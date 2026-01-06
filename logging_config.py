@@ -18,7 +18,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Create logs directory if it doesn't exist
-LOGS_DIR = Path(os.getenv("MCP_LOGS_DIR", "/var/log/mcp-linux-deployer"))
+LOGS_DIR = Path(os.getenv("MCP_LOGS_DIR", "/opt/mcp/linux-app-deployer/mcp-linux-deployer"))
 LOGS_DIR.mkdir(parents=True, exist_ok=True)
 
 # Configuration from environment variables with sensible defaults

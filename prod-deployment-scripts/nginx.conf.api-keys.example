@@ -1,0 +1,10 @@
+http {
+        map $http_x_api_key $mcp_api_allowed {
+            default 0;
+            "securedkey" 1;
+        }
+        ..
+        .
+        .
+        .
+        .
