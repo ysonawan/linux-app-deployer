@@ -32,7 +32,7 @@ server {
     # REST API Endpoint
     location /api {
         # 🔐 API Key Authentication Check
-        if ($api_key_allowed = 0) {
+        if ($mcp_api_allowed = 0) {
             return 401 "Unauthorized: Invalid or missing API key in X-API-Key header";
         }
 
