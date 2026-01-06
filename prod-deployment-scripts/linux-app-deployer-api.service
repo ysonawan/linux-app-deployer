@@ -1,0 +1,18 @@
+[Unit]
+Description=Linux App Deployer FastAPI Server
+After=network.target nginx.service
+Requires=nginx.service
+
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/mcp/linux-app-deployer
+ExecStart=/opt/mcp/linux-app-deployer/.venv/bin/python api.py
+
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+

@@ -5,10 +5,11 @@ server {
     ssl_certificate /etc/letsencrypt/live/mcp.famvest.online/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/mcp.famvest.online/privkey.pem;
 
+    # MCP Server Endpoint
     location /mcp {
         # 🔐 API Key Authentication Check
         if ($mcp_api_allowed = 0) {
-            return 401 "Unauthorized: Invalid or missing API key in X-API-Key hader";
+            return 401 "Unauthorized: Invalid or missing API key in X-API-Key header";
         }
 
         proxy_pass http://127.0.0.1:8001/mcp;
@@ -20,13 +21,48 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 
         proxy_set_header Accept $http_accept;
-
         proxy_set_header X-API-Key $http_x_api_key;
 
         # REQUIRED FOR SSE
         proxy_buffering off;
         proxy_cache off;
         chunked_transfer_encoding off;
+    }
+
+    # REST API Endpoint
+    location /api {
+        # 🔐 API Key Authentication Check
+        if ($api_key_allowed = 0) {
+            return 401 "Unauthorized: Invalid or missing API key in X-API-Key header";
+        }
+
+        proxy_pass http://127.0.0.1:8002/api;
+        proxy_http_version 1.1;
+
+        # REQUIRED HEADERS
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        proxy_set_header X-API-Key $http_x_api_key;
+
+        # Timeouts for long-running deployments
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 600s;
+        proxy_read_timeout 600s;
+    }
+
+    # Health Check Endpoint (optional, no auth needed)
+    location /health {
+        access_log off;
+        proxy_pass http://127.0.0.1:8002/health;
+        proxy_http_version 1.1;
+    }
+
+    # Root redirect (optional)
+    location / {
+        return 404;
     }
 
 }
