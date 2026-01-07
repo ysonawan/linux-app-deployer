@@ -232,7 +232,7 @@ async def get_app_status(application_name: str) -> Dict[str, Any]:
 @app.get("/api/v1/application/logs/{application_name}")
 async def get_app_logs(
     application_name: str,
-    lines: int = Query(100, ge=1, le=10000)
+    lines: int = Query(1000, ge=1, le=10000)
 ) -> Dict[str, Any]:
     """
     Fetch recent logs for the application service.
