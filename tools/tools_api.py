@@ -240,6 +240,35 @@ def restart_application(application_name: str) -> dict:
         logger.error("Error restarting service", exc_info=True)
         raise
 
+def stop_application(application_name: str) -> dict:
+    """Stop systemd service"""
+    logger.info(
+        "Stopping application service",
+        extra={"extra_fields": {"application_name": application_name}}
+    )
+
+    try:
+        require_application(application_name)
+        app_cfg = APPLICATIONS[application_name]
+        service_name = app_cfg["service_name"]
+        require_service(service_name)
+        result = _run(["systemctl", "stop", service_name])
+
+        success = result["code"] == 0
+        if success:
+            logger.info(
+                "Service stopped successfully",
+                extra={"extra_fields": {"service": service_name}}
+            )
+        else:
+            logger.error(
+                "Service stopped failed",
+                extra={"extra_fields": {"service": service_name, "code": result["code"]}}
+            )
+        return {"service": service_name, "success": success, "details": result}
+    except Exception:
+        logger.error("Error stopping service", exc_info=True)
+        raise
 
 def get_application_status(application_name: str) -> dict:
     """Get systemd service status"""
@@ -294,3 +323,32 @@ def get_recent_logs(application_name: str, lines: int = 100) -> dict:
         logger.error("Error fetching service logs", exc_info=True)
         raise
 
+def get_running_services() -> dict:
+    """List running systemd services on the server"""
+    logger.info("Listing running services")
+    try:
+        result = _run(["systemctl", "list-units", "--type=service", "--state=running", "--no-pager"])
+        logger.debug("Running services fetched")
+        return {"running services": result["stdout"]}
+    except Exception:
+        logger.error("Error fetching running services", exc_info=True)
+        raise
+
+def get_server_health_summary() -> dict:
+    """Fetch server health summary including CPU, memory, disk, load average"""
+    logger.info("Fetching server health summary")
+    try:
+        load_result = _run(["uptime"])
+        mem_result = _run(["free", "-h"])
+        disk_result = _run(["df", "-h"])
+        cpu_result = _run(["vmstat", "1", "2"])
+
+        return {
+            "load_average": load_result["stdout"],
+            "memory": mem_result["stdout"],
+            "disk": disk_result["stdout"],
+            "cpu": cpu_result["stdout"]
+        }
+    except Exception:
+        logger.error("Error fetching server health summary", exc_info=True)
+        raise

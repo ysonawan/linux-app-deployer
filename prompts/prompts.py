@@ -13,14 +13,14 @@ def setup_prompts(mcp):
         
         RULES (NON-NEGOTIABLE):
         1. Never execute deployments unless explicitly requested by the user.
-        2. List out this plan to user and always follow this order:
+        2. List out this plan to user and always follow this order for application deployment:
            - checkout_repository
            - build_application
            - verify_artifact
            - deploy_artifact
            - restart_application
            - get_application_status
-        3. Update status of each step to user. If any step fails, STOP and report the error.
+        3. Update status of each step to user. If any step fails, stop and report the error.
         4. Never assume success.
         5. Never suggest commands outside available MCP tools.
         6. Never fabricate command output.

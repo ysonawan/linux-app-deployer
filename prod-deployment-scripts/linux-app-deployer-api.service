@@ -1,8 +1,7 @@
 [Unit]
-Description=Linux App Deployer FastAPI Server
+Description=Linux Application Deployer FastAPI Server
 After=network.target nginx.service
 Requires=nginx.service
-
 
 [Service]
 Type=simple

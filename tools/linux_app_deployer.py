@@ -11,6 +11,8 @@ from tools.tools_api import (
     restart_application,
     get_application_status,
     get_recent_logs,
+    get_running_services,
+    get_server_health_summary
 )
 
 
@@ -47,15 +49,30 @@ def setup_tools(mcp):
 
     @mcp.tool()
     def restart_application_tool(application_name: str) -> dict:
-        """Restart systemd service."""
+        """Restart application using systemd service."""
         return restart_application(application_name)
 
     @mcp.tool()
+    def stop_application_tool(application_name: str) -> dict:
+        """Stop application using systemd service."""
+        return stop_application_tool(application_name)
+
+    @mcp.tool()
     def get_application_status_tool(application_name: str) -> dict:
-        """Get systemd service status."""
+        """Get application status using systemd service status."""
         return get_application_status(application_name)
 
     @mcp.tool()
     def get_recent_logs_tool(application_name: str, lines: int = 100) -> dict:
         """Fetch recent logs safely."""
         return get_recent_logs(application_name, lines)
+
+    @mcp.tool()
+    def get_running_services_tool() -> dict:
+        """List running systemd services on the server"""
+        return get_running_services()
+
+    @mcp.tool()
+    def get_server_health_summary_tool() -> dict:
+        """Fetch server health summary including CPU, memory, disk, load average"""
+        return get_server_health_summary()

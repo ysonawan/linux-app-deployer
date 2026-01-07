@@ -11,7 +11,8 @@ APPLICATIONS = {
         "artifact_path": "target/famvest-*.jar",
         "service_name": "famvest-app",
         "deploy_path": BASE_DEPLOY_DIR / "famvest",
-        "symlink": "famvest.jar"
+        "symlink": "famvest.jar",
+        "application_url": "https://famvest.online"
     },
     "netly": {
         "git_url": "git@github.com/ysonawan/netly.git",
@@ -20,7 +21,8 @@ APPLICATIONS = {
         "artifact_path": "target/netly-*.jar",
         "service_name": "netly-app",
         "deploy_path": BASE_DEPLOY_DIR / "netly",
-        "symlink": "netly.jar"
+        "symlink": "netly.jar",
+        "application_url": "https://netly.famvest.online"
     },
     "duebook": {
         "git_url": "git@github.com/ysonawan/duebook.git",
@@ -29,7 +31,8 @@ APPLICATIONS = {
         "artifact_path": "target/duebook-*.jar",
         "service_name": "duebook-app",
         "deploy_path": BASE_DEPLOY_DIR / "duebook",
-        "symlink": "duebook.jar"
+        "symlink": "duebook.jar",
+        "application_url": "https://duebook.famvest.online"
     }
 }
 

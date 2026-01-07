@@ -16,8 +16,11 @@ from tools.tools_api import (
     verify_artifact,
     deploy_artifact,
     restart_application,
+    stop_application,
     get_application_status,
     get_recent_logs,
+    get_running_services,
+    get_server_health_summary
 )
 from api_config import (
     API_TITLE,
@@ -185,7 +188,24 @@ async def restart_app(application_name: str) -> Dict[str, Any]:
         logger.error("Error restarting application", exc_info=True)
         raise HTTPException(status_code=500, detail="Error restarting application")
 
+@app.post("/api/v1/application/stop/{application_name}")
+async def stop_app(application_name: str) -> Dict[str, Any]:
+    """
+    Stop systemd service for the application.
 
+    Args:
+        application_name: Name of the application to stop
+    """
+    try:
+        logger.info(f"Application stop requested for {application_name}")
+        result = stop_application(application_name)
+        return {"success": result.get("success"), "data": result}
+    except ValueError as e:
+        logger.warning(f"Invalid application or service: {application_name}")
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception:
+        logger.error("Error stopping application", exc_info=True)
+        raise HTTPException(status_code=500, detail="Error stopping application")
 # ========================
 # Status & Monitoring
 # ========================
@@ -232,6 +252,27 @@ async def get_app_logs(
         logger.error("Error fetching application logs", exc_info=True)
         raise HTTPException(status_code=500, detail="Error fetching application logs")
 
+@app.get("/api/v1/running-services")
+async def get_services() -> Dict[str, Any]:
+    """
+    Fetch running systemd services
+    """
+    try:
+        result = get_running_services()
+        return {"success": True, "data": result}
+    except Exception:
+        logger.error("Error fetching running services", exc_info=True)
+        raise HTTPException(status_code=500, detail="Error fetching running services")
+
+@app.get("/api/v1/server-health-summary")
+async def get_server_health_summary_api() -> Dict[str, Any]:
+    """Fetch server health summary including CPU, memory, disk, load average"""
+    try:
+        result = get_server_health_summary()
+        return {"success": True, "data": result}
+    except Exception:
+        logger.error("Error fetching server health summary", exc_info=True)
+        raise HTTPException(status_code=500, detail="Error fetching server health summary")
 
 # ========================
 # Workflow Endpoints
@@ -247,7 +288,6 @@ async def full_deployment_workflow(application_name: str) -> Dict[str, Any]:
     """
     try:
         logger.info(f"Full deployment workflow started for {application_name}")
-        application_name = application_name
 
         workflow_results = {
             "application": application_name,
