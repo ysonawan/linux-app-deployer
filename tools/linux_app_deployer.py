@@ -9,6 +9,7 @@ from tools.tools_api import (
     verify_artifact,
     deploy_artifact,
     restart_application,
+    stop_application,
     get_application_status,
     get_recent_logs,
     get_running_services,
@@ -55,7 +56,7 @@ def setup_tools(mcp):
     @mcp.tool()
     def stop_application_tool(application_name: str) -> dict:
         """Stop application using systemd service."""
-        return stop_application_tool(application_name)
+        return stop_application(application_name)
 
     @mcp.tool()
     def get_application_status_tool(application_name: str) -> dict:
