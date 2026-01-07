@@ -327,7 +327,7 @@ def get_running_services() -> dict:
     """List running systemd services on the server"""
     logger.info("Listing running services")
     try:
-        result = _run(["systemctl", "list-units", "--type=service", "--state=running", "--no-pager"])
+        result = _run(["systemctl", "list-units", "--type=service", "--no-pager"])
         logger.debug("Running services fetched")
         return {"running services": result["stdout"]}
     except Exception:
