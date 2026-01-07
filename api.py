@@ -19,7 +19,7 @@ from tools.tools_api import (
     stop_application,
     get_application_status,
     get_recent_logs,
-    get_running_services,
+    get_all_services_status_on_server,
     get_server_health_summary
 )
 from api_config import (
@@ -252,19 +252,17 @@ async def get_app_logs(
         logger.error("Error fetching application logs", exc_info=True)
         raise HTTPException(status_code=500, detail="Error fetching application logs")
 
-@app.get("/api/v1/running-services")
-async def get_services() -> Dict[str, Any]:
-    """
-    Fetch running systemd services
-    """
+@app.get("/api/v1/server/services/status")
+async def get_all_services_status() -> Dict[str, Any]:
+    """List all systemd services on the server"""
     try:
-        result = get_running_services()
+        result = get_all_services_status_on_server()
         return {"success": True, "data": result}
     except Exception:
         logger.error("Error fetching running services", exc_info=True)
         raise HTTPException(status_code=500, detail="Error fetching running services")
 
-@app.get("/api/v1/server-health-summary")
+@app.get("/api/v1/server/health/summary")
 async def get_server_health_summary_api() -> Dict[str, Any]:
     """Fetch server health summary including CPU, memory, disk, load average"""
     try:

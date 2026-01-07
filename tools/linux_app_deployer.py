@@ -12,7 +12,7 @@ from tools.tools_api import (
     stop_application,
     get_application_status,
     get_recent_logs,
-    get_running_services,
+    get_all_services_status_on_server,
     get_server_health_summary
 )
 
@@ -69,9 +69,9 @@ def setup_tools(mcp):
         return get_recent_logs(application_name, lines)
 
     @mcp.tool()
-    def get_running_services_tool() -> dict:
-        """List running systemd services on the server"""
-        return get_running_services()
+    def get_all_services_status_on_server_tool() -> dict:
+        """List all systemd services on the server"""
+        return get_all_services_status_on_server()
 
     @mcp.tool()
     def get_server_health_summary_tool() -> dict:

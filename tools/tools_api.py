@@ -323,8 +323,8 @@ def get_recent_logs(application_name: str, lines: int = 100) -> dict:
         logger.error("Error fetching service logs", exc_info=True)
         raise
 
-def get_running_services() -> dict:
-    """List running systemd services on the server"""
+def get_all_services_status_on_server() -> dict:
+    """List all systemd services on the server"""
     logger.info("Listing running services")
     try:
         result = _run(["systemctl", "list-units", "--type=service", "--no-pager"])
